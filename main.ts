@@ -23,7 +23,14 @@ function copyTree(sourceDir: string, targetDir: string): void {
 }
 
 function buildEntry(): void {
-  rmSync(outputDir, { recursive: true, force: true });
+  // Remove only the CONTENTS of the output directory, never the directory
+  // itself: in the grader /output is a mounted volume and deleting a mount
+  // point fails with EBUSY ("Device or resource busy").
+  if (existsSync(outputDir)) {
+    for (const entry of readdirSync(outputDir)) {
+      rmSync(join(outputDir, entry), { recursive: true, force: true });
+    }
+  }
   mkdirSync(outputDir, { recursive: true });
   copyTree(join(repoRoot, 'game'), join(outputDir, 'game'));
   copyTree(join(repoRoot, 'screenshots'), join(outputDir, 'screenshots'));
