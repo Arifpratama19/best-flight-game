@@ -16,8 +16,16 @@ Open `game/index.html` in desktop Chrome and fly with the keyboard and mouse.
 
 - `main.ts` — hands the game in (copies `game/` and `screenshots/` to `/output`, writes `dossier.json`)
 - `vendor/makefun-game.ts` — kit library, unchanged
-- `game/` — the playable game as static files
+- `game/` — the playable game as static files: `index.html`, `style.css`, and `src/` split by job — `main.js` (loop & state), `flight.js` (physics), `terrain.js` (islands & runways), `render.js` (3D chase/cockpit view), `missions.js` (ring courses & difficulty), `hud.js` (instruments), `input.js` (keyboard + mouse), `audio.js` (WebAudio synth), `scores.js` (best scores)
 - `screenshots/` — real renders of the game
+
+## Missions
+
+1. **Sunset Ring Run** — 6 rings, then land on Coral Runway.
+2. **Island Hop** — land at two island runways, rings between them.
+3. **Storm Courier** — 8 tight rings in a crosswind, against the clock.
+
+Finishing a mission starts the next round harder: smaller rings, stronger wind, less time. Fuel burns as you fly — green fuel rings and runway landings refuel you. Hard impacts damage the hull; a gentle touchdown scores big.
 
 ## License
 

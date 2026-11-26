@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skyline Archipelago — Island Flight Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="scene" width="1280" height="720"></canvas>
+
+  <div id="hud" class="hidden" aria-label="flight instruments">
+    <div id="hud-top">
+      <div class="hud-box" id="score-box"><span class="hud-label">SCORE</span><span id="hud-score" class="hud-big">0</span><span id="hud-best" class="hud-sub">BEST 0</span></div>
+      <div class="hud-box" id="mission-box"><span class="hud-label" id="hud-mission">SUNSET RING RUN</span><span id="hud-objective" class="hud-sub">Fly through ring 1 of 6</span><span id="hud-timer" class="hud-big">0:00</span></div>
+      <div class="hud-box" id="rings-box"><span class="hud-label">RINGS</span><span id="hud-rings" class="hud-big">0 / 6</span><span id="hud-round" class="hud-sub">ROUND 1</span></div>
+    </div>
+    <div id="compass"><div id="compass-strip"></div><div id="compass-needle"></div></div>
+    <div id="hud-bottom">
+      <div class="gauge" id="gauge-alt"><span class="gauge-label">ALTITUDE</span><span class="gauge-value"><span id="hud-alt">0</span><small> m</small></span><div class="gauge-bar"><div id="alt-fill" class="gauge-fill"></div></div></div>
+      <div class="gauge" id="gauge-spd"><span class="gauge-label">AIRSPEED</span><span class="gauge-value"><span id="hud-spd">0</span><small> km/h</small></span><div class="gauge-bar"><div id="spd-fill" class="gauge-fill"></div></div></div>
+      <div class="gauge" id="gauge-hdg"><span class="gauge-label">HEADING</span><span class="gauge-value"><span id="hud-hdg">000</span><small>°</small></span><div class="gauge-bar"><div id="hdg-fill" class="gauge-fill"></div></div></div>
+      <div class="gauge" id="gauge-thr"><span class="gauge-label">THROTTLE</span><span class="gauge-value"><span id="hud-thr">0</span><small>%</small></span><div class="gauge-bar"><div id="thr-fill" class="gauge-fill"></div></div></div>
+      <div class="gauge" id="gauge-fuel"><span class="gauge-label">FUEL</span><span class="gauge-value"><span id="hud-fuel">100</span><small>%</small></span><div class="gauge-bar"><div id="fuel-fill" class="gauge-fill"></div></div></div>
+      <div class="gauge" id="gauge-hull"><span class="gauge-label">HULL</span><span class="gauge-value"><span id="hud-hull">100</span><small>%</small></span><div class="gauge-bar"><div id="hull-fill" class="gauge-fill"></div></div></div>
+    </div>
+    <div id="horizon"><div id="horizon-ball"><div id="horizon-line"></div></div><span class="gauge-label">ATTITUDE</span></div>
+    <div id="next-ring"><span id="next-ring-label">NEXT RING</span><span id="next-ring-dist">— m</span><span id="next-ring-arrow">▲</span></div>
+    <div id="message"></div>
+    <div id="wind-indicator"><span class="hud-label">WIND</span><span id="hud-wind">calm</span></div>
+  </div>
+
+  <div id="start-screen" class="overlay">
+    <div class="panel">
+      <h1>SKYLINE<br>ARCHIPELAGO</h1>
+      <p class="tagline">Fly the island run. Thread the rings. Land her gentle.</p>
+      <div id="mission-cards">
+        <button class="mission-card" data-mission="ringrun">
+          <span class="mission-name">1 · SUNSET RING RUN</span>
+          <span class="mission-desc">6 glowing rings, then land on Coral Runway. The classic sortie.</span>
+        </button>
+        <button class="mission-card" data-mission="islandhop">
+          <span class="mission-name">2 · ISLAND HOP</span>
+          <span class="mission-desc">Land at two island runways, rings between them. Fuel matters.</span>
+        </button>
+        <button class="mission-card" data-mission="stormcourier">
+          <span class="mission-name">3 · STORM COURIER</span>
+          <span class="mission-desc">8 tight rings in a crosswind, against the clock. For aces only.</span>
+        </button>
+      </div>
+      <div class="controls-grid">
+        <div><b>W / S</b> throttle up / down</div>
+        <div><b>↑ / ↓</b> pitch nose up / down</div>
+        <div><b>← / →</b> bank &amp; turn</div>
+        <div><b>Q / E</b> rudder yaw</div>
+        <div><b>Mouse</b> drag to steer · wheel = throttle</div>
+        <div><b>Space</b> airbrake · <b>C</b> camera · <b>P</b> pause · <b>M</b> sound</div>
+      </div>
+      <p class="hint">Watch your fuel — fly through green fuel rings or land to refuel. Hard hits damage the hull. A gentle touchdown on the runway scores big.</p>
+      <p class="best-line">Best score: <span id="start-best">0</span></p>
+    </div>
+  </div>
+
+  <div id="pause-screen" class="overlay hidden">
+    <div class="panel">
+      <h2>PAUSED</h2>
+      <p>Take a breath. The islands will wait.</p>
+      <button id="resume-btn" class="big-btn">RESUME — P</button>
+      <button id="quit-btn" class="big-btn ghost">BACK TO MENU</button>
+    </div>
+  </div>
+
+  <div id="end-screen" class="overlay hidden">
+    <div class="panel">
+      <h2 id="end-title">LANDED!</h2>
+      <p id="end-subtitle"></p>
+      <div id="end-breakdown"></div>
+      <p class="best-line">Best score: <span id="end-best">0</span></p>
+      <button id="again-btn" class="big-btn">FLY AGAIN — R</button>
+      <button id="menu-btn" class="big-btn ghost">CHANGE MISSION</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
