@@ -98,15 +98,37 @@ export function terrainHeight(x, z) {
 }
 
 export function groundColor(height, x, z) {
-  if (height < 1.2) return '#e8d49a'; // beach sand
-  if (height < 6) return '#8fb573'; // low grass
+  const n = valueNoise(x * 0.02, z * 0.02, 7);
+  const n2 = valueNoise(x * 0.06 + 40, z * 0.06 + 17, 23);
+  if (height < 0.8) return '#e2cd8e'; // wet sand at the waterline
+  if (height < 1.6) return '#eedca8'; // dry beach sand
+  if (height < 6) return n2 > 0.5 ? '#7fae62' : '#8fb573'; // low grass
   if (height < 18) {
-    const n = valueNoise(x * 0.02, z * 0.02, 7);
-    return n > 0.55 ? '#3f7a44' : '#5d9a52'; // forest / meadow
+    // Forest / meadow mosaic: deep green patches against lighter grass.
+    if (n > 0.62) return '#2f6b3a';
+    if (n > 0.55) return '#3f7a44';
+    return n2 > 0.5 ? '#6fae5e' : '#5d9a52';
   }
-  if (height < 34) return '#6f7f5e'; // scrub
-  if (height < 52) return '#8a8378'; // rock
+  if (height < 34) return n > 0.5 ? '#5f7050' : '#6f7f5e'; // scrub
+  if (height < 52) return n2 > 0.5 ? '#7d7668' : '#8a8378'; // rock
   return '#e9edf2'; // snowy peaks
+}
+
+// Blend an rgb()/hex colour toward a target [r, g, b] by t (0..1).
+// Used for distant haze: far terrain melts into the sky colour.
+export function mixColor(color, target, t) {
+  let r, g, b;
+  if (color[0] === '#') {
+    const n = parseInt(color.slice(1), 16);
+    r = (n >> 16) & 255; g = (n >> 8) & 255; b = n & 255;
+  } else {
+    const m = color.match(/\d+/g);
+    r = +m[0]; g = +m[1]; b = +m[2];
+  }
+  r = Math.round(r + (target[0] - r) * t);
+  g = Math.round(g + (target[1] - g) * t);
+  b = Math.round(b + (target[2] - b) * t);
+  return `rgb(${r},${g},${b})`;
 }
 
 export function shadeColor(hex, factor) {

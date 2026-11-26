@@ -23,7 +23,10 @@ Open `game/index.html` in desktop Chrome and fly with the keyboard and mouse.
 
 1. **Sunset Ring Run** — 6 rings, then land on Coral Runway.
 2. **Island Hop** — land at two island runways, rings between them.
-3. **Storm Courier** — 8 tight rings in a crosswind, against the clock.
+3. **Storm Courier** — 8 tight rings in a crosswind and rain, against the clock.
+4. **Sunset Slalom** — 10 tight gates, low and fast; chained rings build a combo up to ×2.
+
+Chain rings within 15 s for a combo multiplier, brush a ring's rim for a near-miss bonus, and grab golden stars off the racing line for +150 each. Each mission flies in its own light: sunset, bright morning, or storm.
 
 Finishing a mission starts the next round harder: smaller rings, stronger wind, less time. Fuel burns as you fly — green fuel rings and runway landings refuel you. Hard impacts damage the hull; a gentle touchdown scores big.
 

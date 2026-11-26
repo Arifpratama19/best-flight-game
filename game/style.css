@@ -8,11 +8,14 @@ body { font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; col
 
 /* ---- HUD ---- */
 #hud { position: absolute; inset: 0; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
-#hud-top { position: absolute; top: 14px; left: 16px; right: 16px; display: flex; justify-content: space-between; gap: 12px; }
-.hud-box { background: rgba(8, 20, 38, .62); border: 1px solid rgba(140, 200, 255, .35); border-radius: 10px; padding: 8px 14px; min-width: 150px; backdrop-filter: blur(2px); }
+#hud-top { position: absolute; top: 12px; left: 16px; right: 16px; display: flex; justify-content: space-between; gap: 12px; }
+.hud-box { background: rgba(8, 20, 38, .62); border: 1px solid rgba(140, 200, 255, .35); border-radius: 10px; padding: 6px 14px 7px; min-width: 150px; backdrop-filter: blur(2px); }
 .hud-label { display: block; font-size: 11px; letter-spacing: .18em; color: #9fd0ff; font-weight: 700; }
-.hud-big { display: block; font-size: 30px; font-weight: 800; line-height: 1.05; color: #fff; font-variant-numeric: tabular-nums; }
+.hud-big { display: block; font-size: 26px; font-weight: 800; line-height: 1.05; color: #fff; font-variant-numeric: tabular-nums; }
 .hud-sub { display: block; font-size: 12px; color: #cfe6ff; font-variant-numeric: tabular-nums; }
+#hud-combo { color: #ffd83d; font-weight: 800; min-height: 14px; }
+#hud-combo.hot { color: #ffb347; }
+#hud-stars { color: #ffe9a8; }
 #mission-box { text-align: center; min-width: 260px; }
 #rings-box { text-align: right; }
 
@@ -20,19 +23,19 @@ body { font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; col
 #compass-strip { position: absolute; top: 0; height: 100%; white-space: nowrap; font-size: 13px; font-weight: 700; letter-spacing: .1em; color: #dff0ff; line-height: 30px; }
 #compass-needle { position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: #ffb347; transform: translateX(-1px); }
 
-#hud-bottom { position: absolute; left: 16px; right: 16px; bottom: 14px; display: flex; gap: 10px; }
-.gauge { flex: 1; background: rgba(8, 20, 38, .66); border: 1px solid rgba(140, 200, 255, .35); border-radius: 10px; padding: 8px 12px 10px; }
-.gauge-label { display: block; font-size: 11px; letter-spacing: .16em; color: #9fd0ff; font-weight: 700; }
-.gauge-value { display: block; font-size: 26px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
-.gauge-value small { font-size: 12px; color: #bcd9ff; font-weight: 600; }
-.gauge-bar { height: 8px; margin-top: 5px; background: rgba(255,255,255,.14); border-radius: 4px; overflow: hidden; }
+#hud-bottom { position: absolute; left: 16px; right: 16px; bottom: 10px; display: flex; gap: 8px; }
+.gauge { flex: 1; background: rgba(8, 20, 38, .66); border: 1px solid rgba(140, 200, 255, .35); border-radius: 9px; padding: 5px 10px 7px; }
+.gauge-label { display: block; font-size: 10px; letter-spacing: .16em; color: #9fd0ff; font-weight: 700; }
+.gauge-value { display: block; font-size: 20px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.gauge-value small { font-size: 11px; color: #bcd9ff; font-weight: 600; }
+.gauge-bar { height: 6px; margin-top: 4px; background: rgba(255,255,255,.14); border-radius: 3px; overflow: hidden; }
 .gauge-fill { height: 100%; width: 50%; border-radius: 4px; background: linear-gradient(90deg, #37c8ff, #7ef0c1); transition: width .12s linear; }
 #fuel-fill { background: linear-gradient(90deg, #ffb347, #ffe08a); }
 #fuel-fill.low { background: linear-gradient(90deg, #ff5a4e, #ff8a5a); }
 #hull-fill { background: linear-gradient(90deg, #7ef0c1, #37c8ff); }
 #hull-fill.low { background: linear-gradient(90deg, #ff5a4e, #ff8a5a); }
 
-#horizon { position: absolute; right: 18px; bottom: 118px; width: 92px; text-align: center; }
+#horizon { position: absolute; right: 18px; bottom: 92px; width: 92px; text-align: center; }
 #horizon-ball { width: 92px; height: 92px; border-radius: 50%; overflow: hidden; position: relative; border: 2px solid rgba(160,210,255,.6); background: linear-gradient(#6db9ff 50%, #7a5a3a 50%); box-shadow: 0 2px 10px rgba(0,0,0,.5); }
 #horizon-line { position: absolute; left: -20%; right: -20%; top: 50%; height: 2px; background: #fff; transform: translateY(-1px); }
 #horizon .gauge-label { margin-top: 4px; }
@@ -42,7 +45,20 @@ body { font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; col
 #next-ring-dist { font-size: 15px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
 #next-ring-arrow { display: inline-block; font-size: 16px; color: #ffd28a; margin-left: 8px; transition: transform .1s linear; }
 #message { position: absolute; left: 50%; top: 38%; transform: translateX(-50%); font-size: 34px; font-weight: 800; letter-spacing: .04em; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.8); text-align: center; white-space: nowrap; }
-#wind-indicator { position: absolute; left: 18px; bottom: 118px; background: rgba(8,20,38,.55); border: 1px solid rgba(140,200,255,.3); border-radius: 8px; padding: 6px 12px; font-size: 13px; }
+#popups { position: absolute; left: 0; right: 0; top: 30%; height: 0; pointer-events: none; }
+.popup { position: absolute; transform: translateX(-50%); font-size: 30px; font-weight: 800; color: #ffd83d; text-shadow: 0 2px 10px rgba(0,0,0,.85); animation: popup-float 1.4s ease-out forwards; white-space: nowrap; }
+.popup-fuel { color: #7dff9e; }
+.popup-star { color: #ffe9a8; }
+.popup-near { color: #ffb347; font-size: 24px; }
+@keyframes popup-float {
+  0% { opacity: 0; margin-top: 10px; }
+  15% { opacity: 1; }
+  100% { opacity: 0; margin-top: -70px; }
+}
+#stall-warning { position: absolute; left: 50%; top: 172px; transform: translateX(-50%); display: none; background: rgba(120, 10, 10, .85); border: 1px solid #ff6a5a; border-radius: 8px; padding: 6px 16px; font-size: 15px; font-weight: 800; letter-spacing: .08em; color: #ffd9d4; animation: stall-blink .5s steps(2) infinite; white-space: nowrap; }
+#stall-warning.show { display: block; }
+@keyframes stall-blink { 50% { background: rgba(200, 30, 20, .9); } }
+#wind-indicator { position: absolute; left: 18px; bottom: 92px; background: rgba(8,20,38,.55); border: 1px solid rgba(140,200,255,.3); border-radius: 8px; padding: 6px 12px; font-size: 13px; }
 #wind-indicator .hud-label { display: inline; margin-right: 6px; }
 
 .cockpit-mode #hud-bottom, .cockpit-mode #horizon { display: none; }
@@ -72,6 +88,19 @@ body { font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; col
 @media (max-width: 900px) {
   .panel h1 { font-size: 36px; }
   .hud-big { font-size: 22px; }
+  #hud-top { flex-wrap: wrap; }
+  .hud-box { min-width: 0; flex: 1; padding: 5px 10px 6px; }
+  #mission-box { min-width: 0; order: 3; flex-basis: 100%; }
   #hud-bottom { flex-wrap: wrap; }
   .gauge { flex: 1 1 28%; }
+  /* The compass strip and attitude ball crowd a phone screen; heading and
+     attitude stay readable in the gauges and cockpit dials. */
+  #compass { display: none; }
+  #horizon { display: none; }
+  #wind-indicator { bottom: 150px; }
+  #next-ring { top: 230px; }
+  #message { font-size: 20px; white-space: normal; width: 92vw; }
+  .popup { font-size: 22px; }
+  .popup-near { font-size: 18px; }
+  #stall-warning { top: 278px; font-size: 12px; padding: 5px 10px; }
 }

@@ -64,7 +64,7 @@ export function updateEngineSound(audio, throttle, speed, flying) {
     return;
   }
   const t = audio.ctx.currentTime;
-  const base = 52 + throttle * 68 + speed * 0.35;
+  const base = 46 + throttle * 84 + speed * 0.5;
   audio.engineOsc[0].frequency.setTargetAtTime(base, t, 0.08);
   audio.engineOsc[1].frequency.setTargetAtTime(base * 1.5, t, 0.08);
   audio.engineFilter.frequency.setTargetAtTime(240 + throttle * 700, t, 0.1);

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skyline Archipelago — Island Flight Game</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,7 +13,7 @@
 
   <div id="hud" class="hidden" aria-label="flight instruments">
     <div id="hud-top">
-      <div class="hud-box" id="score-box"><span class="hud-label">SCORE</span><span id="hud-score" class="hud-big">0</span><span id="hud-best" class="hud-sub">BEST 0</span></div>
+      <div class="hud-box" id="score-box"><span class="hud-label">SCORE</span><span id="hud-score" class="hud-big">0</span><span id="hud-best" class="hud-sub">BEST 0</span><span id="hud-combo" class="hud-sub"></span><span id="hud-stars" class="hud-sub">★ 0</span></div>
       <div class="hud-box" id="mission-box"><span class="hud-label" id="hud-mission">SUNSET RING RUN</span><span id="hud-objective" class="hud-sub">Fly through ring 1 of 6</span><span id="hud-timer" class="hud-big">0:00</span></div>
       <div class="hud-box" id="rings-box"><span class="hud-label">RINGS</span><span id="hud-rings" class="hud-big">0 / 6</span><span id="hud-round" class="hud-sub">ROUND 1</span></div>
     </div>
@@ -28,6 +29,8 @@
     <div id="horizon"><div id="horizon-ball"><div id="horizon-line"></div></div><span class="gauge-label">ATTITUDE</span></div>
     <div id="next-ring"><span id="next-ring-label">NEXT RING</span><span id="next-ring-dist">— m</span><span id="next-ring-arrow">▲</span></div>
     <div id="message"></div>
+    <div id="popups"></div>
+    <div id="stall-warning">⚠ STALL — NOSE DOWN · FULL THROTTLE</div>
     <div id="wind-indicator"><span class="hud-label">WIND</span><span id="hud-wind">calm</span></div>
   </div>
 
@@ -48,6 +51,10 @@
           <span class="mission-name">3 · STORM COURIER</span>
           <span class="mission-desc">8 tight rings in a crosswind, against the clock. For aces only.</span>
         </button>
+        <button class="mission-card" data-mission="slalom">
+          <span class="mission-name">4 · SUNSET SLALOM</span>
+          <span class="mission-desc">10 tight gates, low and fast. Chain them — combos pay double.</span>
+        </button>
       </div>
       <div class="controls-grid">
         <div><b>W / S</b> throttle up / down</div>
@@ -57,7 +64,7 @@
         <div><b>Mouse</b> drag to steer · wheel = throttle</div>
         <div><b>Space</b> airbrake · <b>C</b> camera · <b>P</b> pause · <b>M</b> sound</div>
       </div>
-      <p class="hint">Watch your fuel — fly through green fuel rings or land to refuel. Hard hits damage the hull. A gentle touchdown on the runway scores big.</p>
+      <p class="hint">Watch your fuel — fly through green fuel rings or land to refuel. Chain rings within 15 s for a combo up to ×2, brush a ring's rim for a near miss, and grab golden stars off the racing line for +150. Hard hits damage the hull. A gentle touchdown on the runway scores big.</p>
       <p class="best-line">Best score: <span id="start-best">0</span></p>
     </div>
   </div>

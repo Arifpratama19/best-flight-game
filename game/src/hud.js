@@ -33,6 +33,18 @@ export function updateHud(plane, state) {
   hullFill.style.width = `${plane.hull}%`;
   hullFill.classList.toggle('low', plane.hull < 35);
   $('hud-wind').textContent = windLabel(state);
+  // Stall warning: flashing banner when the wing stops flying.
+  $('stall-warning').classList.toggle('show', !!plane.stalled && !plane.landed && plane.fuel > 0);
+  // Combo badge under the score.
+  const comboEl = $('hud-combo');
+  if (state.combo > 1 && state.comboTimer > 0) {
+    comboEl.textContent = `COMBO ×${state.combo} — ${Math.ceil(state.comboTimer)}s`;
+    comboEl.classList.add('hot');
+  } else {
+    comboEl.textContent = state.bestCombo > 1 ? `BEST COMBO ×${state.bestCombo}` : '';
+    comboEl.classList.remove('hot');
+  }
+  $('hud-stars').textContent = `★ ${state.starsHit}`;
   // Attitude ball: horizon line rolls with the plane and shifts with pitch.
   const ball = $('horizon-ball');
   ball.style.background = 'linear-gradient(#6db9ff 50%, #7a5a3a 50%)';
@@ -71,6 +83,20 @@ export function showMessage(text, seconds = 2.2) {
   el.textContent = text;
   window.clearTimeout(messageTimer);
   messageTimer = window.setTimeout(() => { el.textContent = ''; }, seconds * 1000);
+}
+
+// Floating score popup: drifts up and fades, one per event. Used for ring
+// passes, stars, near misses and landings so the score gain reads on screen.
+export function showPopup(text, kind = 'score') {
+  const layer = $('popups');
+  if (!layer) return;
+  const el = document.createElement('div');
+  el.className = `popup popup-${kind}`;
+  el.textContent = text;
+  el.style.left = `${46 + Math.random() * 8}%`;
+  layer.appendChild(el);
+  window.setTimeout(() => el.remove(), 1500);
+  while (layer.children.length > 6) layer.firstChild.remove();
 }
 
 export function showScreen(id) {

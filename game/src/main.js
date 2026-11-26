@@ -2,13 +2,13 @@
 // flying, paused, ended), mission flow and the screenshot hooks.
 // The game is a complete island flight game: ring courses, runway landings,
 // fuel and hull management, rounds that get harder, and three missions.
-import { createRenderer, renderScene, chaseCamera } from './render.js';
+import { createRenderer, renderScene, chaseCamera, spawnRingBurst, spawnSpray } from './render.js';
 import { createPlane, resetPlane, stepFlight, headingDegrees } from './flight.js';
-import { buildMission, nextRing, checkRingPass, allRingsDone, ringsRemaining } from './missions.js';
-import { terrainHeight, makeClouds, RUNWAYS } from './terrain.js';
+import { buildMission, nextRing, checkRingPass, checkStars, allRingsDone, ringsRemaining } from './missions.js';
+import { terrainHeight, makeClouds, RUNWAYS, SEA_LEVEL } from './terrain.js';
 import { createInput, attachInput, readControls, clearKeys } from './input.js';
 import { createAudio, startAudio, updateEngineSound, playRingChime, playFuelChime, playLandingThud, playCrashSound, playClick, setMuted } from './audio.js';
-import { updateHud, showMessage, showScreen, showEndScreen } from './hud.js';
+import { updateHud, showMessage, showPopup, showScreen, showEndScreen } from './hud.js';
 import { loadBest, saveBest, loadOverallBest } from './scores.js';
 
 const canvas = document.getElementById('scene');
@@ -29,6 +29,8 @@ const game = {
   elapsed: 0,
   muted: false,
   bestScore: 0,
+  shake: 0,
+  sprayTimer: 0,
 };
 
 function fitCanvas() {
@@ -61,6 +63,8 @@ function startMission(missionId, round = 1) {
   input.throttle = 0.55;
   game.camSmooth = null;
   game.elapsed = 0;
+  game.shake = 0;
+  game.sprayTimer = 0;
   game.phase = 'flying';
   showScreen(null);
   startAudio(audio);
@@ -83,6 +87,7 @@ function finishLanding() {
   s.score += landingPoints;
   s.landingsDone += 1;
   playLandingThud(audio);
+  showPopup(`LANDED +${landingPoints}`, 'score');
   if (s.landingsDone < s.landingsNeeded && s.secondLandAt) {
     // Island Hop: refuel, take off again for the second runway.
     plane.fuel = 100;
@@ -98,6 +103,9 @@ function finishLanding() {
   const rows = [
     ['Rings flown', `${s.ringsHit} × up to 140+ pts`],
     ['Ring points', String(s.ringScore)],
+    ['Bonus stars', `${s.starsHit} × 150 = ${s.starScore}`],
+    ['Near misses', String(s.nearMissScore)],
+    ['Best combo', s.bestCombo > 1 ? `×${s.bestCombo}` : '—'],
     ['Fuel rings', String(s.fuelRingsHit)],
     ['Landing bonus', String(s.landingScore)],
     ['Time left', `${Math.round(s.timeLeft)} s`],
@@ -150,15 +158,20 @@ function finishOutOfFuel() {
 
 function step(dt) {
   game.time += dt;
+  game.shake = Math.max(0, game.shake - dt * 1.6);
   if (game.phase !== 'flying') return;
   const s = game.state;
   game.elapsed += dt;
   s.timeLeft -= dt;
+  s.comboTimer = Math.max(0, s.comboTimer - dt);
+  if (s.comboTimer <= 0) s.combo = 0;
   if (s.timeLeft <= 0) { s.timeLeft = 0; finishOutOfTime(); return; }
   if (plane.fuel <= 0 && !plane.landed) { finishOutOfFuel(); return; }
 
   const controls = readControls(input, dt);
   const event = stepFlight(plane, controls, s.wind, dt);
+  // Hard banking rattles the camera a little; impacts rattle it a lot.
+  if (Math.abs(plane.roll) > 0.85) game.shake = Math.max(game.shake, 0.25);
   if (event === 'landed') {
     if (allRingsDone(s)) { finishLanding(); return; }
     // Landed early: refuel and take off again, rings still waiting.
@@ -168,21 +181,51 @@ function step(dt) {
     plane.speed = 28;
     showMessage('LANDED EARLY — refuelled! Rings still waiting.', 3);
   } else if (event === 'crashed') {
+    game.shake = 1;
     finishCrash('You hit the ground too hard. Mind your descent rate and speed.');
     return;
   } else if (event === 'impact') {
+    game.shake = 0.9;
     playCrashSound(audio);
     showMessage(`HARD HIT! Hull ${Math.round(plane.hull)}%`, 1.6);
   } else if (event === 'scrape') {
+    game.shake = 0.5;
     showMessage(`Scraped the ground — hull ${Math.round(plane.hull)}%`, 1.4);
   }
 
-  const points = checkRingPass(s, plane);
-  if (points > 0) {
+  // Low over the sea: spray kicks up behind the plane.
+  if (plane.y < 7 && terrainHeight(plane.x, plane.z) < SEA_LEVEL + 0.5) {
+    game.sprayTimer -= dt;
+    if (game.sprayTimer <= 0) {
+      game.sprayTimer = 0.12;
+      spawnSpray(plane.x, SEA_LEVEL + 0.5, plane.z);
+    }
+  }
+
+  const res = checkRingPass(s, plane);
+  if (res.points > 0) {
     const ring = s.rings.find((r) => r.passed && !r.counted);
-    if (ring && ring.fuel) { playFuelChime(audio); showMessage(`FUEL RING! +${points} — tanks topped up`, 1.8); }
-    else { playRingChime(audio); showMessage(`RING! +${points}`, 1.6); }
-    if (ring) ring.counted = true;
+    if (res.kind === 'fuel') {
+      playFuelChime(audio);
+      if (ring) { spawnRingBurst(ring, true); ring.counted = true; }
+      showPopup(`+${res.points}`, 'fuel');
+      showMessage(`FUEL RING! +${res.points} — tanks topped up`, 1.8);
+    } else if (res.kind === 'near') {
+      showPopup('NEAR MISS +20', 'near');
+      showMessage('NEAR MISS! +20 — thread it next time', 1.4);
+    } else {
+      playRingChime(audio);
+      if (ring) { spawnRingBurst(ring, false); ring.counted = true; }
+      showPopup(s.combo > 1 ? `+${res.points}  COMBO ×${s.combo}` : `+${res.points}`, 'score');
+      showMessage(s.combo > 1 ? `RING! +${res.points} — COMBO ×${s.combo}` : `RING! +${res.points}`, 1.6);
+    }
+  }
+  const star = checkStars(s, plane);
+  if (star.points > 0) {
+    playFuelChime(audio);
+    if (star.star) spawnRingBurst({ x: star.star.x, y: star.star.y, z: star.star.z, radius: 8 }, false);
+    showPopup('★ +150', 'star');
+    showMessage('BONUS STAR! +150', 1.6);
   }
   s.nextRing = nextRing(s);
   s.objective = currentObjective();
@@ -198,10 +241,12 @@ function draw() {
     cam,
     clouds,
     rings: game.state ? game.state.rings : [],
+    stars: game.state ? game.state.stars : [],
     nextRing: game.state ? game.state.nextRing : null,
     time: game.time,
     cameraMode: game.cameraMode,
-    timeOfDay: game.missionId === 'stormcourier' ? 'day' : 'sunset',
+    timeOfDay: game.state ? game.state.mission.timeOfDay : 'sunset',
+    shake: game.shake,
   });
   if (game.phase === 'flying' && game.state) updateHud(plane, game.state);
 }
@@ -272,20 +317,22 @@ document.getElementById('start-best').textContent = String(loadOverallBest());
 showScreen('start-screen');
 
 // ---- Screenshot / test hooks: auto-start a photogenic in-flight moment ----
-// ?shot=ring  — flying toward the first ring, chase view
-// ?shot=runway — on final approach to Coral Runway
+// ?shot=ring    — flying toward the first ring, chase view
+// ?shot=runway  — on final approach to Coral Runway
 // ?shot=cockpit — cockpit view mid-flight toward a ring
-// ?shot=menu  — the start screen
+// ?shot=storm   — Storm Courier in the rain, toward a ring
+// ?shot=slalom  — Sunset Slalom, low through the gates
+// ?shot=menu    — the start screen
 const params = new URLSearchParams(location.search);
 const shot = params.get('shot');
-if (shot === 'ring' || shot === 'cockpit' || shot === 'runway') {
-  const mission = shot === 'runway' ? 'ringrun' : 'ringrun';
+if (shot === 'ring' || shot === 'cockpit' || shot === 'runway' || shot === 'storm' || shot === 'slalom') {
+  const mission = shot === 'storm' ? 'stormcourier' : shot === 'slalom' ? 'slalom' : 'ringrun';
   startMission(mission, 1);
   const s = game.state;
   if (shot === 'cockpit') {
     game.cameraMode = 'cockpit';
     plane.x = -30; plane.y = 42; plane.z = 560; plane.heading = 0.05; plane.speed = 44;
-  } else if (shot === 'ring') {
+  } else if (shot === 'ring' || shot === 'storm' || shot === 'slalom') {
     const ring = s.rings[0];
     plane.x = ring.x - 60; plane.y = ring.y + 6; plane.z = ring.z - 260;
     plane.heading = Math.atan2(ring.x - plane.x, ring.z - plane.z);
@@ -309,7 +356,7 @@ window.__flight = {
   headingDegrees: () => headingDegrees(plane),
   groundAt: (x, z) => terrainHeight(x, z),
   setPlane: (patch) => Object.assign(plane, patch),
-  state: () => ({ phase: game.phase, score: game.state?.score ?? 0, ringsHit: game.state?.ringsHit ?? 0, fuel: plane.fuel, hull: plane.hull, x: plane.x, y: plane.y, z: plane.z, speed: plane.speed }),
+  state: () => ({ phase: game.phase, score: game.state?.score ?? 0, ringsHit: game.state?.ringsHit ?? 0, fuel: plane.fuel, hull: plane.hull, x: plane.x, y: plane.y, z: plane.z, speed: plane.speed, combo: game.state?.combo ?? 0, starsHit: game.state?.starsHit ?? 0, nextRing: game.state?.nextRing ? { x: game.state.nextRing.x, y: game.state.nextRing.y, z: game.state.nextRing.z } : null, landAt: game.state?.landAt ? { x: game.state.landAt.x, z: game.state.landAt.z, name: game.state.landAt.name } : null }),
 };
 
 requestAnimationFrame(loop);

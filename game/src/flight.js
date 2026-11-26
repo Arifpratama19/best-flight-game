@@ -17,6 +17,7 @@ export function createPlane() {
     verticalSpeed: 0,
     fuel: 100,
     hull: 100,
+    stalled: false,
     onGround: false,
     landed: false,
   };
@@ -34,6 +35,7 @@ export function resetPlane(plane, spawn) {
   plane.verticalSpeed = 0;
   plane.fuel = 100;
   plane.hull = 100;
+  plane.stalled = false;
   plane.onGround = false;
   plane.landed = false;
 }
@@ -69,6 +71,7 @@ export function stepFlight(plane, controls, wind, dt) {
 
   // Vertical speed: lift from speed and pitch, sink when stalled or slow.
   const stalled = p.speed < STALL_SPEED;
+  p.stalled = stalled;
   const lift = stalled ? -1 : Math.sin(p.pitch) * p.speed;
   const sink = stalled ? (STALL_SPEED - p.speed) * 0.55 : 0;
   const targetVs = lift - sink - (p.speed < 8 ? 2.5 : 0);
